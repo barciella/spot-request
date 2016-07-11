@@ -1,0 +1,29 @@
+{
+  "name": "spot-request",
+  "version": "1.0.0",
+  "description": "aws, spot, restify, ec2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/barciella/spot-request.git"
+  },
+  "keywords": [
+    "aws",
+    "spot",
+    "restify",
+    "ec2"
+  ],
+  "author": "Francisco Barciella",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/barciella/spot-request/issues"
+  },
+  "homepage": "https://github.com/barciella/spot-request#readme",
+  "dependencies": {
+    "aws-sdk": "^2.4.6",
+    "restify": "^4.1.1"
+  }
+}
