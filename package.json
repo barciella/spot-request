@@ -24,6 +24,7 @@
   "homepage": "https://github.com/barciella/spot-request#readme",
   "dependencies": {
     "aws-sdk": "^2.4.6",
-    "restify": "^4.1.1"
+    "restify": "^4.1.1",
+    "uuid": "^2.0.2"
   }
 }

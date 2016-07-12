@@ -1,0 +1,12 @@
+{
+	"params": {
+	    "LaunchSpecification": {
+		    "ImageId": "ami-5aaf3a36",
+			"InstanceType": "t1.micro",
+			"Type": "one-time",
+			"SpotPrice": "0.0001",
+			"ValidFrom":"new Date || 'Wed Dec 31 1969 16:00:00 GMT-0800 (PST)' || 123456789"
+		},
+		"userData": "#cloud-config\n repo_update: true\n repo_upgrade: all\n\n\nruncmd:\n -docker run -t -i ubuntu /bin/echo hello world"
+	}
+}

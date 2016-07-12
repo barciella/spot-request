@@ -1,5 +1,7 @@
 var restify = require('restify'),
   tasks = require('./tasks'),
+  AWS = require('aws-sdk'),
+  uuid = require('uuid'),
   port = process.env.PORT || 4000;
 
   var server = restify.createServer({
@@ -16,7 +18,7 @@ server.use(restify.bodyParser());
 server.get('v1/tasks', tasks.get);
 server.get('v1/tasks/:id', tasks.getById);
 server.post('v1/tasks', tasks.post);
-server.post('v1/tasks/:id/callback', tasks.callback);
+server.put('v1/tasks/:id/callback', tasks.callback);
 
 server.listen(port, function(){
   console.log('api running at ' + port);

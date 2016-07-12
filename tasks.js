@@ -1,5 +1,10 @@
+
+var AWS = require('aws-sdk'),
+  uuid = require('uuid');
+
 function tasksController(){
   var that = this;
+  var ec2 = new AWS.EC2({region: 'sa-east-1'});
   that.jobs = [];
 
 //Get all the jobs
@@ -8,25 +13,45 @@ function tasksController(){
     return next();
   }
 
-//Checar qual tipo de validador pro post, exemplo de id, name por enquanto
+//Post a new job. It will auto generate an ID, start the spot request and
+//schedule a Cron job to see if the spot request is fullfilled 15 minutes
+//after the schedule spot request
   that.post = function(req, res, next){
-    if(!req.body.hasOwnProperty('id') || !req.body.hasOwnProperty('name')){
+    if(!req.body.hasOwnProperty('params')){
       res.send(500);
       return next();
     }else{
+//checar isso aqui
+      var idAuto = uuid.v4();
       that.jobs.push({
-        id: parseInt(req.body.id),
-        name: req.body.name
+        id: idAuto,
+        params: req.body.params,
+        userData: req.body.userData
       });
-      //precisa colocar o código de start na instance aqui
+      //Start Spot Instance - This works
+      ec2.requestSpotInstances(req.body.params, function (error, data){
+        if (error) {
+          console.log(error);
+        }else{
+          console.log(data);
+        }
+      });
+      //ec2.describeSpotPriceHistory(params, function(error, data){
+      //  if (error) {
+      //    console.log(error);
+      //  }else {
+      //    console.log(data);
+      //  }
+      //});
       res.send(201);
+
     }
   };
 
 //Get specific jobs
   var findTaskById = function(req){
     var found = that.jobs.filter(function(p){
-      return p.id === parseInt(req.params.id);
+      return p.id === req.params.id;
     });
     if(found){
       return found[0];
@@ -47,14 +72,11 @@ function tasksController(){
 
 //callback
 that.callback = function(req, res, next){
-  if(!req.body.hasOwnProperty('id') || !req.body.hasOwnProperty('name')){
-    res.send(500);
-    return next();
-  }else{
-    that.jobs.push({
-      id: parseInt(req.body.id),
-      name: req.body.name,
-      status: "termine a instancia com id x"
+  var found = findTaskById(req);
+  if (found){
+    res.send(200, found);
+    that.jobs[found].push({
+    status: "termine a instancia com id x"
     });
     res.send(201);
   }
