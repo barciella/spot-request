@@ -1,7 +1,7 @@
 //termina instancias, precisa do instance id - CLI
 
 aws ec2 terminate-instances --instance-ids i-1f94689d
-aws ec2 cancel-spot-instance-requests --spot-instance-request-ids sir-04fm1x72
+aws ec2 cancel-spot-instance-requests --spot-instance-request-ids sir-04fhjq00^X
 
 
 sir-04fcdsdb,
