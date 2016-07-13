@@ -1,6 +1,7 @@
 
 var AWS = require('aws-sdk'),
-  uuid = require('uuid');
+  uuid = require('uuid'),
+  btoa = require('btoa');
 
 function tasksController(){
   var that = this;
@@ -17,34 +18,30 @@ function tasksController(){
   }
 
   that.post = function(req, res, next){
-    var lastSpotInstanceRequestId = that.lastSpotInstanceRequestId;
     idAuto = uuid.v4();
     that.jobs[idAuto] = {};
-    that.jobs[idAuto].params = req.body.paramsEnv;
+    that.jobs[idAuto].LaunchSpecification = req.body.paramsEnv;
+    that.jobs[idAuto].dados = req.body.UserData;
+  //  console.log(req.body.UserData);
+    that.jobs[idAuto].base64 = btoa(req.body.UserData);
+    console.log(that.jobs[idAuto].base64);
     //that.jobs[idAuto].teste = new Date();
 
-
     var params = {
-      launchSpecification: that.jobs[idAuto].params,
+      LaunchSpecification: that.jobs[idAuto].LaunchSpecification,
+      UserData: toString(that.jobs[idAuto].base64),
       SpotPrice: "0.002",
-      ValidUntil: new Date
-    }
-    //Start Spot Instance - This works
-    ec2.requestSpotInstances(params, function(err, data){
+    };
+
+    ec2.requestSpotInstances(params, function(error, data){
       if (error) {
-        console.log(err);
+        console.log(error);
       } else {
         console.log(data);
-        //console.log(data.SpotInstanceRequests[0].SpotInstanceRequestId);
-        //lastSpotInstanceRequestId.push(data.SpotInstanceRequests[0].SpotInstanceRequestId);
-        //console.log(lastSpotInstanceRequestId);
-        //that.spotInstancesIds[ data.SpotInstanceRequests[0].SpotInstanceRequestId ].uuid = idAuto;
-        //that.spotInstancesIds[ data.SpotInstanceRequests[0].SpotInstanceRequestId ].startDate = new Date();
-        //that.jobs[idAuto].SpotInstanceRequests = data.SpotInstanceRequests;
+        that.jobs[idAuto].SpotInstanceRequests = data.SpotInstanceRequests;
       }
     });
     res.send(201);
-
   };
 
   //Get specific jobs

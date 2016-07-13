@@ -25,6 +25,7 @@
   "dependencies": {
     "aws-sdk": "^2.4.6",
     "body-parser": "^1.15.2",
+    "btoa": "^1.1.2",
     "restify": "^4.1.1",
     "uuid": "^2.0.2"
   }
