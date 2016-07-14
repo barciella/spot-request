@@ -6,7 +6,7 @@ var AWS = require('aws-sdk'),
 
 function tasksController(){
   var that = this;
-  var ec2 = new AWS.EC2({region: 'sa-east-1'});
+  var ec2 = new AWS.EC2({region: 'us-west-2'});
   that.jobs = {};
   var date = moment();
   var price = "";
@@ -25,30 +25,31 @@ function tasksController(){
 
     //get spot price for instance_id
     var paramsPrice = {
-      AvailabilityZone: "sa-east-1a",
+      AvailabilityZone: "us-west-2a",
       InstanceTypes: [that.jobs[idAuto].LaunchSpecification.InstanceType],
       EndTime: date.toISOString(),
       StartTime: date.toISOString(date.subtract(15, "minutes")),
       ProductDescriptions: ["Linux/UNIX"]
     }
-    // ec2.describeSpotPriceHistory(paramsPrice, function(error, data){
-    //   if(error){
-    //     console.log(error);
-    //   } else {
-    //     console.log(data);
-    //     var price1 = data.SpotPriceHistory.SpotPrice;
-    //     // price1(data.SpotPriceHistory.SpotPrice);
-    //     // price = data.SpotPriceHistory.SpotPrice;
-    //     // // return price;
-    //      console.log(price1);
-    //   }
-    // });
+    ec2.describeSpotPriceHistory(paramsPrice, function(error, data){
+      if(error){
+        console.log(error);
+      } else {
+        console.log(data);
+        that.jobs[idAuto].SpotPrice = data.SpotPriceHistory[0].SpotPrice;
+        console.log("preco eh" + price1);
+        // price1(data.SpotPriceHistory.SpotPrice);
+        // price = data.SpotPriceHistory.SpotPrice;
+        // // return price;
+
+      }
+    });
 
     //launch the Spot InstanceType
    var params = {
      LaunchSpecification: that.jobs[idAuto].LaunchSpecification,
-      SpotPrice: "0.001"
-    };
+     SpotPrice: that.jobs[idAuto].SpotPrice
+     };
 
 
    ec2.requestSpotInstances(params, function(error, data){
