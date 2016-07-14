@@ -1,8 +1,13 @@
-"#cloud-config\nrepo_update: true\nrepo_upgrade: all\n\nruncmd:\n-docker run -t -i ubuntu /bin/echo hello world"
+{
+	"paramsEnv": {
+		"ImageId": "ami-7f77b31f",
+		"InstanceType": "t1.micro"
+		},
+	"KeyPair": "se-devops-test",
+	"DockerID": "testando1234"
 
 
-
-
+}
 
 
 
