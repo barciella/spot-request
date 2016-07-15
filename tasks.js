@@ -42,7 +42,7 @@ runcmd:
  - chmod 2775 /var/www
  - [ find, /var/www, -type, d, -exec, chmod, 2775, {}, + ]
  - [ find, /var/www, -type, f, -exec, chmod, 0664, {}, + ]
- - [ sh, -c, 'echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php' ]` //+ req.body.DockerID; //auto test, jesus christ it works. req.
+ - [ sh, -c, 'echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php' ]` //can do + req.body.DockerID later; //auto test, jesus christ it works.
     that.jobs[idAuto].LaunchSpecification.UserData = btoa(that.jobs[idAuto].LaunchSpecification.UserData); //transform user data in base64 so aws can accept
 
     //get spot price for instance_id and use that price to launch the ec2

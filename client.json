@@ -1,4 +1,5 @@
 //POST NEW JOB REQS
+//http://localhost:4000/v1/tasks
 {
 	{
 	"LaunchSpecification": {
@@ -10,20 +11,24 @@
 }
 }
 
-//GET JOB TO TIMEOUT, CANCEL INSTANCE AND CREATE ec2
+//POST JOB TO TIMEOUT, CANCEL INSTANCE AND CREATE ec2
+//http://localhost:4000/v1/tasks/timeout
 {
 	"id": "de991e6d-c02e-473a-b806-276c34211c6b" //ID is tagged value
 }
 
+//Get All Jobs:
+http://localhost:4000/v1/tasks
 
+//GetSpecific job
+http://localhost:4000/v1/tasks/:id
 
-
-//OPTIONAL INSIDE "paramsEnv"
+//OPTIONAL INSIDE "LaunchSpecification"
 LaunchSpecification
 
 {
   "ImageId": "string", //already there. Required.
-  "KeyName": "string",
+  "KeyName": "string", //already there for testing purposes. Not Required
   "SecurityGroups": ["string", ...],
   "UserData": "string", //this is done by code, don't use it.
   "AddressingType": "string",

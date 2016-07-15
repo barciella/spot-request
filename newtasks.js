@@ -1,4 +1,4 @@
-Finish the timeout function.
+Finish the timeout function to call the ec2 instance with the right parameters.
 Configure the userdata
   Cloud-config to start Docker with the dockerImageId
   Get script to check if spot instance is being terminated and call ./timeout to create ec2 or /callback to finish the instance
