@@ -18,7 +18,7 @@ server.use(restify.bodyParser());
 server.get('v1/tasks', tasks.get);
 server.get('v1/tasks/:id', tasks.getById);
 server.post('v1/tasks', tasks.post);
-server.post('v1/tasks/:id/callback', tasks.callback);
+server.post('v1/tasks/callback', tasks.callback);
 server.post('v1/tasks/timeout', tasks.timeout);
 
 

@@ -1,4 +1,4 @@
-//POST NEW JOB REQS
+//POST - New job.
 //http://localhost:4000/v1/tasks
 {
 	{
@@ -11,17 +11,29 @@
 }
 }
 
-//POST JOB TO TIMEOUT, CANCEL INSTANCE AND CREATE ec2
-//http://localhost:4000/v1/tasks/timeout
-{
-	"id": "de991e6d-c02e-473a-b806-276c34211c6b" //ID is tagged value
-}
-
-//Get All Jobs:
+//GET -  All Jobs:
 http://localhost:4000/v1/tasks
 
-//GetSpecific job
+//GET - Specific job
 http://localhost:4000/v1/tasks/:id
+
+//POST - Script Timeout. Cancel the spot request and launch as ec2.
+http://localhost:4000/v1/tasks/timeout
+{
+	"id": "f1815cbe-7745-4d0c-954d-689da5714d8f"
+}
+
+//POST - Terminate Instance
+http://localhost:4000/v1/tasks/callback
+{
+	"id": "1e85a855-3156-48f3-819f-d536165cdb27"
+}
+
+
+
+
+
+
 
 //OPTIONAL INSIDE "LaunchSpecification"
 LaunchSpecification

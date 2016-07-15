@@ -21,28 +21,19 @@ function tasksController(){
     idAuto = uuid.v4(); //generate uuid
     that.jobs[idAuto] = {};
     that.jobs[idAuto] = req.body;
-    console.log(that.jobs[idAuto]);
+    that.jobs[idAuto].idAuto = idAuto; //to be used by the timeout and callback function
     that.jobs[idAuto].LaunchSpecification.UserData = `#cloud-config
 repo_update: true
 repo_upgrade: all
+output : { all : '| tee -a /var/log/cloud-init-output.log' }
 
 packages:
- - httpd24
- - php56
- - mysql55
- - server
- - php56-mysqlnd
+ - docker
 
 runcmd:
- - service httpd start
- - chkconfig httpd on
- - groupadd www
- - [ sh, -c, "usermod -a -G www ec2-user" ]
- - [ sh, -c, "chown -R root:www /var/www" ]
- - chmod 2775 /var/www
- - [ find, /var/www, -type, d, -exec, chmod, 2775, {}, + ]
- - [ find, /var/www, -type, f, -exec, chmod, 0664, {}, + ]
- - [ sh, -c, 'echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php' ]` //can do + req.body.DockerID later; //auto test, jesus christ it works.
+ - touch /home/ec2-user/beforeDockerStart
+ - service docker start
+ - docker run `+ req.body.DockerID//can do + req.body.DockerID later; //auto test, jesus christ it works.
     that.jobs[idAuto].LaunchSpecification.UserData = btoa(that.jobs[idAuto].LaunchSpecification.UserData); //transform user data in base64 so aws can accept
 
     //get spot price for instance_id and use that price to launch the ec2
@@ -70,6 +61,7 @@ runcmd:
            } else {
              console.log(data);
              that.jobs[idAuto].SpotRequest = data;
+             that.jobs[idAuto].InternalStatus = "SpotInstanceRequested";
              //tag the instance with generated autoid
              var params = {
                 Resources: [that.jobs[idAuto].SpotRequest.SpotInstanceRequests[0].SpotInstanceRequestId],
@@ -80,6 +72,7 @@ runcmd:
                  console.log(error);
                } else {
                  console.log(data);
+                 return next();//checar isso aqui
               }
              });
           }
@@ -103,67 +96,68 @@ runcmd:
   that.callback = function(req, res, next){
     var oJob = that.jobs[req.params.id];
     if (oJob){
-      var params = {
-        InstanceIds: oJob
-      }
-        ec2.terminateInstances = (params, function(error,data){
+      ec2.terminateInstances = (oJob.InstanceID, function(error,data){
           if (error) {
             return (error);
           } else {
             return (data);
           }
         });
-    res.send(201, "Instance " + oJob + " Terminated");
+        oJob.InternalStatus = "Job Done";
+        res.send(201, "Instance " + oJob.InstanceID + " Terminated");
     }else{
     send(404, "Job Not Found");
     };
   }
 
-
-  //timeout. To be called when the request isn't fullfiled in 15 minutes, then it start an ec2 instance and tags it
+  //Timeout gets the tagged ID of the spot-request, cancels it and then start an EC2 instance with the same parameters.
   that.timeout = function(req, res, next){
-    var oJob = that.jobs[req.params.id];
-    if (oJob){
-      //cancel the spot request
-      var params = {
-        SpotInstanceRequestIds: [oJob.SpotRequest.SpotInstanceRequests[0].SpotInstanceRequestId]
-      }
-      ec2.cancelSpotInstanceRequests(params, function(error, data){
-        if (error) {
-          console.log(error);
-          res.send(404, "Job Not Found");
-        } else {
-          console.log(data);
-        }
-      });
-          //oJob.LaunchSpecification + {"MinCount: 1"}, {"MaxCount: 2"};
-          //launch the Ec2 request
-          //  var params = {
-          //     MinCount: 1,
-          //     MaxCount: 1}
+   var oJob = that.jobs[req.params.id];
+   if (oJob){
+     //cancel the spot request
+     var params = {
+       SpotInstanceRequestIds: [oJob.SpotRequest.SpotInstanceRequests[0].SpotInstanceRequestId]
+     }
+     ec2.cancelSpotInstanceRequests(params, function(error, data){
+       if (error) {
+         console.log(error);
+         res.send(404, "Job Not Found");
+       } else {
+         console.log(data);
+         //launch the EC2 request, MinCount and MaxCount are needed to launch an ec2 InstanceType
+         oJob.LaunchSpecification["MinCount"] = 1;
+         oJob.LaunchSpecification["MaxCount"] = 1;
+         ec2.runInstances(oJob.LaunchSpecification, function(error, data){
+           if (error) {
+             console.log(error);
+           } else {
+             console.log(data);
+             oJob.InstanceID = data.Instances[0].InstanceId;
+             res.send(201, "Instance ID is " + oJob.InstanceID);
+             oJob.InternalStatus = "EC2 Instance Running";
+             //tags the Instance
+             var params = {
+                  Resources: [oJob.InstanceID],
+                  Tags: [{Key: "idAuto", Value: oJob.idAuto}]
+              }
+               ec2.createTags(params, function(error, data){
+                 if (error) {
+                   console.log(error);
+                 } else {
+                   console.log(data);
+                   return next(); //checar isso aqui
+                }
+              });
+           }
+         });
+       }
+     });
 
-            // ec2.runInstances(oJob.LaunchSpecification + params, function(error, data){
-            //  if (error) {
-            //    console.log(error);
-            //  } else {
-            //    console.log(data);
-            //    oJob.InstanceInfo = data;
-               //tag the instance with generated autoid
-              //  var params = {
-              //     Resources: [that.jobs[idAuto].SpotRequest.SpotInstanceRequests[0].SpotInstanceRequestId],
-              //     Tags: [{Key: "idAuto", Value: idAuto}]
-              // }
-              //  ec2.createTags(params, function(error, data){
-              //    if (error) {
-              //      console.log(error);
-              //    } else {
-              //      console.log(data);
-              //   }
-              //  });
-          //   }
-          // });
-          }
-        }
+   } else {
+     res.send(404, "Job not Found");
+     return (next);
+   }
+  }
 }
 
 module.exports = new tasksController();
