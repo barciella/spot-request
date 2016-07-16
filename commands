@@ -6,7 +6,7 @@ sudo docker run hello-world
 
 
 aws ec2 describe-instances --filters "Name=instance-type,Values=t1.micro"
-aws ec2 describe-instances --instance-ids "i-a4817630"
+aws ec2 describe-instances --instance-ids "i-6dbe4ff9"
 aws ec2 terminate-instances --instance-ids i-64f601f0 i-a4817630
 aws ec2 cancel-spot-instance-requests --spot-instance-request-ids "sir-03cel0p8"
 
@@ -23,3 +23,11 @@ aws ec2 describe-instances --filters "Name=owner-id,Values=935605334497" "Name=i
 
 Installing : xfsprogs-3.2.2-2.20.amzn1.x86_64                                                                             1/2
  Installing : docker-1.11.2-1.6.amzn1.x86_64
+
+
+
+Getting container exited
+
+ sudo docker ps -l
+ CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
+ 3792775edfa2        hello-world         "/hello"            11 minutes ago      Exited (0) 11 minutes ago                       lonely_carson
