@@ -1,2 +1,2 @@
 #!/bin/bash
-yum install lamp /y
+ping www.google.com
