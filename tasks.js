@@ -48,6 +48,7 @@ runcmd:
     ec2.describeSpotPriceHistory(paramsPrice, function(error, data){
       if(error){
         console.log(error);
+        return next();
       } else {
         console.log(data);
         that.jobs[idAuto].SpotPrice = data.SpotPriceHistory[0].SpotPrice;
@@ -60,6 +61,7 @@ runcmd:
           ec2.requestSpotInstances(params, function(error, data){
            if (error) {
              console.log(error);
+             return next();
             } else {
              console.log(data);
              that.jobs[idAuto].InternalStatus = "Spot Instance Requested with ValidFrom " + that.jobs[idAuto].ValidFrom;
