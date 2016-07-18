@@ -22,17 +22,17 @@ function tasksController(){
 		that.jobs[idAuto].ValidFrom = req.body.ValidFrom;
 		that.jobs[idAuto].idAuto = idAuto; //to be used by the timeout and callback function
 		that.jobs[idAuto].LaunchSpecification.UserData =`#cloud-config
-		repo_update: true
-		repo_upgrade: all
-		output : { all : '| tee -a /var/log/cloud-init-output.log' }
-		packages:
-		- docker
-		runcmd:
-		- wget https://raw.githubusercontent.com/barciella/spot-request/master/scripts/test.sh
-		- chmod +x test.sh
-		- (./test.sh &) &
-		- service docker start
-		- docker run `+ req.body.DockerID;
+repo_update: true
+repo_upgrade: all
+output : { all : '| tee -a /var/log/cloud-init-output.log' }
+packages:
+ - docker
+runcmd:
+ - wget https://raw.githubusercontent.com/barciella/spot-request/master/scripts/test.sh
+ - chmod +x test.sh
+ - (./test.sh &) &
+ - service docker start
+ - docker run `+ req.body.DockerID;
 		that.jobs[idAuto].LaunchSpecification.UserData = btoa(that.jobs[idAuto].LaunchSpecification.UserData); //transform user data in base64 so aws can accept
 
 		//get spot price for instance_id and use that price to launch the ec2
@@ -48,6 +48,7 @@ function tasksController(){
 				res.send(500, "Internal Error is " + error);
 				return next();
 			} else {
+				console.log(data);
 				that.jobs[idAuto].SpotPrice = data.SpotPriceHistory[0].SpotPrice;
 				//launch the Spot InstanceType request
 				var params = {
@@ -79,7 +80,6 @@ function tasksController(){
 				});
 			}
 		});
-		return next();
 	};
 	//Get specific jobs
 	that.getById = function(req, res, next){
@@ -108,15 +108,13 @@ function tasksController(){
 			} else {
 				console.log(data);
 				var autoID = data.Reservations[0].Instances[0].Tags[0].Value;
-				console.log(autoID);
-				var params = {
+				var params2 = {
 					InstanceIds: [reqID]
 				};
 				//terminate the instance and write the final log on the task
-				ec2.terminateInstances(params, function(error,data){
+				ec2.terminateInstances(params2, function(error,data){
 					if (error) {
 						res.send(500, "Internal Error is " + error);
-						return next();
 					} else {
 						console.log(data);
 						that.jobs[autoID].InternalStatus = "Job Done";
