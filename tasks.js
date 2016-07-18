@@ -108,11 +108,11 @@ runcmd:
 			} else {
 				console.log(data);
 				var autoID = data.Reservations[0].Instances[0].Tags[0].Value;
-				var params2 = {
+				var params = {
 					InstanceIds: [reqID]
 				};
 				//terminate the instance and write the final log on the task
-				ec2.terminateInstances(params2, function(error,data){
+				ec2.terminateInstances(params, function(error,data){
 					if (error) {
 						res.send(500, "Internal Error is " + error);
 					} else {
