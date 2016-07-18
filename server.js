@@ -2,7 +2,7 @@ var restify = require('restify'),
   tasks = require('./tasks'),
   AWS = require('aws-sdk'),
   uuid = require('uuid'),
-  port = process.env.PORT || 80;
+  port = process.env.PORT || 4000;
 
   var server = restify.createServer({
     name: 'Restify Server'
