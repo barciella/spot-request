@@ -1,4 +1,13 @@
 #!/bin/bash
-INSTANCE_ID=`wget -qO- http://instance-data/latest/meta-data/instance-id`
-REGION=`wget -qO- http://instance-data/latest/meta-data/placement/availability-zone | sed 's/.$//'`
-aws ec2 describe-tags --region $REGION --filter "Name=resource-id,Values=$INSTANCE_ID" --output=text | sed -r 's/TAGS\t(.*)\t.*\t.*\t(.*)/\1="\2"/' > /etc/ec2-tags
+while true
+	do
+			if docker ps -l | grep Exited
+				then touch /etc/callback.txt
+
+			elseif
+				curl -s http://169.254.169.254/latest/meta-data/spot/termination-time | grep -q .*T.*Z;
+					then touch /etc/timeout.txt
+			else
+				sleep 5
+			fi
+done
