@@ -20,9 +20,13 @@ The script ./searchScript.js is used to check open spot-instance requests that h
 
   Gets a list of all the tasks.
 
+
+
 -GET: http://localhost:4000/v1/:id
 
   Get the contents of an specific task.
+
+
 
 -POST: http://localhost:4000/v1/tasks
 Required:
@@ -41,6 +45,8 @@ Response: (201, "Spot Requested is idAuto")
 
 Info: It will accept anything valid inside the LaunchSpecification. Requires an IamInstanceProfile to be able to tag itself.
 
+
+
 -POST: http://localhost:4000/v1/tasks/timeout
 ```Required:
   {
@@ -51,6 +57,8 @@ Info: It will accept anything valid inside the LaunchSpecification. Requires an 
 Response: (201, "Instance ID is EC2InstanceID")
 
 Info: To be called by ./searchScript or a terminating instance. Will start an EC2 instance with the same parameters.
+
+
 
 -POST: http://localhost:4000/v1/tasks/callback
 Required:
