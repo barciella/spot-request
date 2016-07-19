@@ -2,8 +2,8 @@ var AWS = require("aws-sdk"),
 	http = require("http")
 	moment = require("moment");
 
-function searchScript(){
-	setInterval(function(){
+//function searchScript(){
+	//setInterval(function(){
 			var ec2 = new AWS.EC2({region: "us-west-2"});
 
 		var params = {
@@ -28,13 +28,13 @@ function searchScript(){
 					if (moment(data.SpotInstanceRequests[i].ValidFrom).add(15, "minutes").isBefore(date) ){
 						var tag = data.SpotInstanceRequests[i].Tags[0].Value;
 						//send the post to server
-						var bodyString = {
+						var bodyString = [{
 							"id": tag
-						};
+						}];
 
 						var headers = {
 							"Content-Type": "application/json",
-							"Content-Length": bodystring.length
+							"Content-Length": bodyString.length
 						};
 						var options = {
 							host: "localhost",
@@ -46,13 +46,9 @@ function searchScript(){
 
 						var callback = function(response) {
 							var str = " ";
-
-							//another chunk of data has been recieved, so append it to `str`
 							response.on("data", function(chunk) {
 								str += chunk;
 							});
-
-							//the whole response has been recieved, so we just print it out here
 							response.on("end", function() {
 								console.log(str);
 							});
@@ -64,7 +60,7 @@ function searchScript(){
 			}
 
 		});
-	},900000);
-}
+	//},900000);
+//}
 
-module.exports = new searchScript();
+//module.exports = new searchScript();

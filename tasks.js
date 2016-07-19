@@ -32,7 +32,10 @@ runcmd:
  - chmod +x test.sh
  - (./test.sh &) &
  - service docker start
- - docker run `+ req.body.DockerID;
+ - docker run `+ req.body.DockerID + `
+ - GETID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
+ - echo $GETID
+ - aws ec2 create-tags --resources $GETID --tags "Key=idAuto,Value=`+that.jobs[idAuto] + `"`
 		that.jobs[idAuto].LaunchSpecification.UserData = btoa(that.jobs[idAuto].LaunchSpecification.UserData); //transform user data in base64 so aws can accept
 
 		//get spot price for instance_id and use that price to launch the ec2
@@ -63,20 +66,7 @@ runcmd:
 						that.jobs[idAuto].InternalStatus = "Spot Instance Requested with ValidFrom " + that.jobs[idAuto].ValidFrom;
 						that.jobs[idAuto].SpotInstanceRequestId = data.SpotInstanceRequests[0].SpotInstanceRequestId;
 						res.send(201, "Spot Requests with ID: " + idAuto);
-						//tag the instance with generated autoid
-						var params = {
-							Resources: [that.jobs[idAuto].SpotInstanceRequestId],
-							Tags: [{Key: "idAuto", Value: idAuto}]
-						};
-						ec2.createTags(params, function(error, data){
-							if (error) {
-								res.send(500, "Internal Error is " + error);
-
-							} else {
-								console.log(data);
-							}
-						});
-					}
+						}
 				});
 			}
 		});
@@ -94,42 +84,33 @@ runcmd:
 
 	/*callback. The instance will send a post to the rest service with "instanceid" as required.
 	The code will look for the tagged value, terminate the instance and write the Finished status code to the task*/
+
 	that.callback = function(req, res, next){
 		//get the autoID with the describe InstanceID
 		var reqID = req.body.instanceid;
+		var autoID = req.body.autoID;
 		var params = {
 			InstanceIds: [reqID]
 		};
-		ec2.describeInstances(params, function(error,data){
+		//terminate the instance and write the final log on the task
+			ec2.terminateInstances(params, function(error,data){
 			if (error) {
-				console.log(error);
-				res.send(404, "Instance "+ reqID + " not found");
-				return next();
-			} else {
-				console.log(data);
-				var autoID = data.Reservations[0].Instances[0].Tags[0].Value;
-				var params = {
-					InstanceIds: [reqID]
-				};
-				//terminate the instance and write the final log on the task
-				ec2.terminateInstances(params, function(error,data){
-					if (error) {
-						res.send(500, "Internal Error is " + error);
-					} else {
-						console.log(data);
-						that.jobs[autoID].InternalStatus = "Job Done";
-						res.send(201, "Instance " + that.jobs[autoID].InstanceID + " Terminated");
-					}
-				});
-			}
-		});
+				res.send(500, "Internal Error is " + error);
+				} else {
+					console.log(data);
+					that.jobs[autoID].InternalStatus = "Job Done";
+					res.send(201, "Instance " + reqID + " Terminated");
+				}
+			});
+		}
+	});
 	};
 
 	//Timeout gets the tagged ID of the spot-request, cancels it and then start an EC2 instance with the same parameters.
 	that.timeout = function(req, res, next){
-		var oJob = that.jobs[req.params.id];
+		var reqID = req.body.instanceid;
+		var oJob = that.jobs[req.body.autoID];
 		if (oJob){
-			//cancel the spot request
 			var params = {
 				SpotInstanceRequestIds: [oJob.SpotInstanceRequestId]
 			};
@@ -146,22 +127,9 @@ runcmd:
 							console.log(error);
 						} else {
 							console.log(data);
-							oJob.InstanceID = data.Instances[0].InstanceId;
-							res.send(201, "Instance ID is " + oJob.InstanceID);
+							oJob.EC2InstanceID = data.Instances[0].InstanceId;
+							res.send(201, "Instance ID is " + oJob.EC2InstanceID);
 							oJob.InternalStatus = "EC2 Instance Running";
-							//tags the Instance
-							var params = {
-								Resources: [oJob.InstanceID],
-								Tags: [{Key: "idAuto", Value: oJob.idAuto}]
-							};
-							ec2.createTags(params, function(error, data){
-								if (error) {
-									console.log(error);
-								} else {
-									console.log(data);
-
-								}
-							});
 						}
 					});
 				}

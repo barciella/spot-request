@@ -6,7 +6,7 @@ sudo docker run hello-world
 
 
 aws ec2 describe-instances --filters "Name=instance-type,Values=t1.micro"
-aws ec2 describe-instances --instance-ids "i-6dbe4ff9"
+aws ec2 describe-instances --instance-ids i-6034afbd
 aws ec2 terminate-instances --instance-ids i-64f601f0 i-a4817630
 aws ec2 cancel-spot-instance-requests --spot-instance-request-ids "sir-03cel0p8"
 
