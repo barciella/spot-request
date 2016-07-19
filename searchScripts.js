@@ -27,9 +27,10 @@ var AWS = require("aws-sdk"),
 				for (var i = 0; i < data.SpotInstanceRequests.length; i++){
 					if (moment(data.SpotInstanceRequests[i].ValidFrom).add(15, "minutes").isBefore(date) ){
 						var tag = data.SpotInstanceRequests[i].Tags[0].Value;
+						console.log(tag);
 						//send the post to server
 						var bodyString = [{
-							"id": tag
+							"autoId": tag
 						}];
 
 						var headers = {
@@ -37,7 +38,7 @@ var AWS = require("aws-sdk"),
 							"Content-Length": bodyString.length
 						};
 						var options = {
-							host: "localhost",
+							host: "http://179.99.217.141",
 							path: "/v1/tasks/timeout",
 							port: 4000,
 							method: "POST",

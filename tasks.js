@@ -20,7 +20,7 @@ function tasksController(){
 		var idAuto = uuid.v4(); //generate uuid
 		that.jobs[idAuto] = req.body;
 		that.jobs[idAuto].ValidFrom = req.body.ValidFrom;
-		that.jobs[idAuto].idAuto = idAuto; //to be used by the timeout and callback function
+		that.jobs[idAuto].idAuto = idAuto; //to be used by userdata to tag
 		that.jobs[idAuto].LaunchSpecification.UserData =`#cloud-config
 repo_update: true
 repo_upgrade: all
@@ -35,7 +35,7 @@ runcmd:
  - docker run `+ req.body.DockerID + `
  - GETID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
  - echo $GETID
- - aws ec2 create-tags --resources $GETID --tags "Key=idAuto,Value=`+that.jobs[idAuto] + `"`
+ - aws ec2 create-tags --resources $GETID --tags "Key=idAuto,Value=`+that.jobs[idAuto].idAuto + `"`
 		that.jobs[idAuto].LaunchSpecification.UserData = btoa(that.jobs[idAuto].LaunchSpecification.UserData); //transform user data in base64 so aws can accept
 
 		//get spot price for instance_id and use that price to launch the ec2
@@ -124,7 +124,7 @@ runcmd:
 					oJob.LaunchSpecification["MaxCount"] = 1;
 					ec2.runInstances(oJob.LaunchSpecification, function(error, data){
 						if (error) {
-							console.log(error);
+							res.send(500, "Internal Error is " + error);
 						} else {
 							console.log(data);
 							oJob.EC2InstanceID = data.Instances[0].InstanceId;
