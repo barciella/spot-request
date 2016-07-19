@@ -103,8 +103,8 @@ runcmd:
 				}
 			});
 		}
-	});
-	};
+
+
 
 	//Timeout gets the tagged ID of the spot-request, cancels it and then start an EC2 instance with the same parameters.
 	that.timeout = function(req, res, next){
