@@ -20,15 +20,13 @@ The script ./searchScript.js is used to check open spot-instance requests that h
   Info: Gets a list of all the tasks.
 
 
-
 -GET: http://localhost:4000/v1/:id
   Info: Get the contents of an specific task.
 
 
 
 -POST: http://localhost:4000/v1/tasks
-Required:
-```
+```javascript
     {
     "LaunchSpecification":
     {
@@ -45,8 +43,7 @@ Info: It will accept anything valid inside the LaunchSpecification. Requires an 
 
 
 -POST: http://localhost:4000/v1/tasks/timeout
-  Required:
-```
+```javascript
     {
       instanceid: xxxxxx,
       autoID: yyyyyyy
@@ -58,8 +55,7 @@ Response: (201, "Instance ID is EC2InstanceID")
 
 
 -POST: http://localhost:4000/v1/tasks/callback
-  Required:
-```
+```javascript
     {
       instanceid: xxxxxx,
       autoID: yyyyyyy
