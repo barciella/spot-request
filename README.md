@@ -4,13 +4,13 @@ This is a RESTFUL service that launch spot-requests in AWS based on region and I
 
 ## Installation
 You will have to configure the server address on the following files:
-./scripts/test.sh on lines 5 and 11
+./scripts/test.sh on lines 5 and 11 and
 
 ./searchScript.js on line 40
 
 You have to install [node](https://nodejs.org/en/) and run $"npm install" and then "npm start".
 
-It is also available on [dockerhub]
+It is also available on [dockerhub](https://hub.docker.com/r/barciella/spot-request/)
 
 The script ./searchScript.js is used to check open spot-instance requests that have not being fulfilled 15 minutes after being opened. It will cancel the spot-instance requests and send a call to this service to start an ec2 instance. Depending on your needs you can change this attributes, schedule it on cron etc.
 
@@ -21,7 +21,7 @@ The script ./searchScript.js is used to check open spot-instance requests that h
 
 
 -GET: http://localhost:4000/v1/:id
-  Info: Get the contents of an specific task.
+  Info: Get the contents of a specific task.
 
 
 
