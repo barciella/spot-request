@@ -17,14 +17,12 @@ The script ./searchScript.js is used to check open spot-instance requests that h
 ## API Reference
 
 -GET: http://localhost:4000/v1/tasks
-
-  Gets a list of all the tasks.
+  Info: Gets a list of all the tasks.
 
 
 
 -GET: http://localhost:4000/v1/:id
-
-  Get the contents of an specific task.
+  Info: Get the contents of an specific task.
 
 
 
@@ -42,31 +40,30 @@ Required:
     }
 ```
 Response: (201, "Spot Requested is idAuto")
-
 Info: It will accept anything valid inside the LaunchSpecification. Requires an IamInstanceProfile to be able to tag itself.
 
 
 
 -POST: http://localhost:4000/v1/tasks/timeout
-```Required:
-  {
-    instanceid: xxxxxx,
-    autoID: yyyyyyy
-  }
+  Required:
+```
+    {
+      instanceid: xxxxxx,
+      autoID: yyyyyyy
+    }
 ```
 Response: (201, "Instance ID is EC2InstanceID")
-
-Info: To be called by ./searchScript or a terminating instance. Will start an EC2 instance with the same parameters.
+  Info: To be called by ./searchScript or a terminating instance. Will start an EC2 instance with the same parameters.
 
 
 
 -POST: http://localhost:4000/v1/tasks/callback
-Required:
-```{
-  instanceid: xxxxxx,
-  autoID: yyyyyyy
-}
+  Required:
+```
+    {
+      instanceid: xxxxxx,
+      autoID: yyyyyyy
+    }
 ```
 Response: (201, "Instance IDxxx Terminated")
-
-Info: To be called when the docker job is done in the instance.
+  Info: To be called when the docker job is done in the instance.
