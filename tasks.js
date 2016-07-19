@@ -34,11 +34,10 @@ runcmd:
  - service docker start
  - docker run `+ req.body.DockerID + `
  - GETID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
- - echo $GETID
  - aws ec2 create-tags --resources $GETID --tags "Key=idAuto,Value=`+that.jobs[idAuto].idAuto + `"`
 		that.jobs[idAuto].LaunchSpecification.UserData = btoa(that.jobs[idAuto].LaunchSpecification.UserData); //transform user data in base64 so aws can accept
 
-		//get spot price for instance_id and use that price to launch the ec2
+		//get spot price for requirements and launch the request
 		var paramsPrice = {
 			AvailabilityZone: "us-west-2a",
 			InstanceTypes: [that.jobs[idAuto].LaunchSpecification.InstanceType],
@@ -51,7 +50,6 @@ runcmd:
 				res.send(500, "Internal Error is " + error);
 				return next();
 			} else {
-				console.log(data);
 				that.jobs[idAuto].SpotPrice = data.SpotPriceHistory[0].SpotPrice;
 				//launch the Spot InstanceType request
 				var params = {
@@ -65,7 +63,19 @@ runcmd:
 					} else {
 						that.jobs[idAuto].InternalStatus = "Spot Instance Requested with ValidFrom " + that.jobs[idAuto].ValidFrom;
 						that.jobs[idAuto].SpotInstanceRequestId = data.SpotInstanceRequests[0].SpotInstanceRequestId;
-						res.send(201, "Spot Requests with ID: " + idAuto);
+						res.send(201, "Spot Requested is " + idAuto);
+						//tag the request
+						var params = {
+                Resources: [that.jobs[idAuto].SpotRequest.SpotInstanceRequests[0].SpotInstanceRequestId],
+                Tags: [{Key: "idAuto", Value: idAuto}]
+            };
+             ec2.createTags(params, function(error, data){
+               if (error) {
+                 res.send(500, "Internal Error is " + error);
+               } else {
+                 return next();
+              }
+             });
 						}
 				});
 			}
@@ -97,7 +107,6 @@ runcmd:
 			if (error) {
 				res.send(500, "Internal Error is " + error);
 				} else {
-					console.log(data);
 					that.jobs[autoID].InternalStatus = "Job Done";
 					res.send(201, "Instance " + reqID + " Terminated");
 				}
@@ -118,7 +127,6 @@ runcmd:
 				if (error) {
 					res.send(500, "Internal Error is " + error);
 				} else {
-					console.log(data);
 					//launch the EC2 request, MinCount and MaxCount are needed to launch an ec2 InstanceType
 					oJob.LaunchSpecification["MinCount"] = 1;
 					oJob.LaunchSpecification["MaxCount"] = 1;
@@ -126,7 +134,6 @@ runcmd:
 						if (error) {
 							res.send(500, "Internal Error is " + error);
 						} else {
-							console.log(data);
 							oJob.EC2InstanceID = data.Instances[0].InstanceId;
 							res.send(201, "Instance ID is " + oJob.EC2InstanceID);
 							oJob.InternalStatus = "EC2 Instance Running";

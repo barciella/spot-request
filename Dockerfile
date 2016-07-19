@@ -6,5 +6,6 @@ COPY package.json /usr/src/app/
 RUN apk add --update nodejs
 COPY . /usr/src/app
 RUN cd /usr/src/app; npm install
-EXPOSE 80
+EXPOSE 4000
+CMD [ "npm", "install"]
 CMD [ "npm", "start" ]
