@@ -24,6 +24,7 @@ ec2.describeSpotInstanceRequests(params, function(error,data){
 		console.log(data);
 		var date = new moment();
 		for (var i = 0; i < data.SpotInstanceRequests.length; i++){
+			//this is where you can choose to change how long the spot request could be open before cancelling and adding ec2. Right now is 15 minutes after ValidFrom
 			if (moment(data.SpotInstanceRequests[i].ValidFrom).add(15, "minutes").isBefore(date) ){
 				var tag = data.SpotInstanceRequests[i].Tags[0].Value;
 				//send the post to server to cancel the request for spot and launch ec2
